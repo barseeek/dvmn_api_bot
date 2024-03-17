@@ -3,32 +3,23 @@ from time import sleep
 
 import environs
 import requests
-from telegram.ext import Updater
-
+from telegram import Bot
 
 TIMEOUT = 60
 RECONNECT_DELAY = 5
 
-env = environs.Env()
-env.read_env()
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=env.str('LOG_LEVEL', 'INFO'))
+logger = logging.getLogger(__file__)
 
 
-def run_polling(url, params):
+def fetch_payload(url, params, api_token):
     headers = {
-        'Authorization': f'Token {env.str("API_TOKEN")}'
+        'Authorization': f'Token {api_token}'
     }
-    try:
-        response = requests.get(url, headers=headers, params=params, timeout=TIMEOUT)
-        response_json = response.json()
-        logging.info("Успешный запрос к API, timestamp = {0}".format(params.get('timestamp')))
-        return response_json
-    except requests.exceptions.ReadTimeout:
-        logging.warning('Timeout')
-    except requests.exceptions.ConnectionError:
-        logging.warning('ConnectionError')
-        sleep(RECONNECT_DELAY)
+    response = requests.get(url, headers=headers, params=params, timeout=TIMEOUT)
+    response.raise_for_status()
+    payload = response.json()
+    logger.info("Успешный запрос к API, timestamp = {0}".format(params.get('timestamp')))
+    return payload
 
 
 def format_message(message_params) -> str:
@@ -42,12 +33,24 @@ def format_message(message_params) -> str:
 
 
 def main():
-    updater = Updater(token=env.str('TELEGRAM_BOT_TOKEN'))
-    logging.info('Бот запущен')
+    env = environs.Env()
+    env.read_env()
+    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                        level=env.str('LOG_LEVEL', 'INFO'))
+    bot = Bot(token=env.str('TELEGRAM_BOT_TOKEN'))
+    logger.info('Бот запущен')
     url = 'https://dvmn.org/api/long_polling/'
     params = {}
+    dvmn_token = env.str("API_TOKEN")
     while True:
-        payload = run_polling(url,params)
+        payload = None
+        try:
+            payload = fetch_payload(url, params, dvmn_token)
+        except requests.exceptions.ReadTimeout:
+            logger.warning('Timeout')
+        except requests.exceptions.ConnectionError:
+            logger.warning('ConnectionError')
+            sleep(RECONNECT_DELAY)
         if payload:
             if payload['status'] == 'found':
                 params['timestamp'] = payload['last_attempt_timestamp']
@@ -56,8 +59,8 @@ def main():
                     'is_negative': payload['new_attempts'][0]['is_negative'],
                     'lesson_url': payload['new_attempts'][0]['lesson_url']
                 }
-                logging.debug(payload)
-                updater.bot.send_message(chat_id=env.str('TELEGRAM_CHAT_ID'), text=format_message(params_review))
+                logger.debug(payload)
+                bot.send_message(chat_id=env.str('TELEGRAM_CHAT_ID'), text=format_message(params_review))
             elif payload['status'] == 'timeout':
                 params['timestamp'] = payload['timestamp_to_request']
 
