@@ -60,6 +60,8 @@ python main.py
 - `API_TOKEN` - Токен для доступа к API DVMN.org.
 
 - `TELEGRAM_BOT_TOKEN` - Токен вашего бота в Telegram. Получить этот токен можно у [@BotFather](https://t.me/BotFather) в Telegram после регистрации бота.
+- 
+- `TELEGRAM_LOG_BOT_TOKEN` - Токен вашего бота-логгера в Telegram. Получить этот токен можно у [@BotFather](https://t.me/BotFather) в Telegram после регистрации бота.
 
 - `TELEGRAM_CHAT_ID` - ID чата, в который бот будет отправлять сообщения. Узнать свой chat_id можно у бота @userinfobot в Telegram.
 
@@ -70,6 +72,7 @@ python main.py
 ```
 API_TOKEN=secretdvmntoken123456
 TELEGRAM_BOT_TOKEN=123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
+TELEGRAM_LOG_BOT_TOKEN=123456:ABC-DEF1234ghIkl-zyx5sad8df7a21
 TELEGRAM_CHAT_ID=123456789
 LOG_LEVEL=INFO
 ```

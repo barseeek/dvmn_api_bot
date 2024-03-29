@@ -50,7 +50,7 @@ def main():
             try:
                 payload = fetch_payload(url, params, dvmn_token)
             except requests.exceptions.ReadTimeout:
-                logger.warning('Timeout')
+                logger.debug('Timeout')
             except requests.exceptions.ConnectionError:
                 logger.warning('ConnectionError')
                 sleep(RECONNECT_DELAY)
