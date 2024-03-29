@@ -3,6 +3,7 @@ from time import sleep
 
 import environs
 import requests
+from log import TelegramLogsHandler
 from telegram import Bot
 
 TIMEOUT = 60
@@ -38,11 +39,13 @@ def main():
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         level=env.str('LOG_LEVEL', 'INFO'))
     bot = Bot(token=env.str('TELEGRAM_BOT_TOKEN'))
+    logger.addHandler(TelegramLogsHandler())
     logger.info('Бот запущен')
     url = 'https://dvmn.org/api/long_polling/'
     params = {}
     dvmn_token = env.str("API_TOKEN")
     while True:
+        0/0
         payload = None
         try:
             payload = fetch_payload(url, params, dvmn_token)
