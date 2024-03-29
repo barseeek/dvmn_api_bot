@@ -45,27 +45,29 @@ def main():
     params = {}
     dvmn_token = env.str("API_TOKEN")
     while True:
-        0/0
-        payload = None
         try:
-            payload = fetch_payload(url, params, dvmn_token)
-        except requests.exceptions.ReadTimeout:
-            logger.warning('Timeout')
-        except requests.exceptions.ConnectionError:
-            logger.warning('ConnectionError')
-            sleep(RECONNECT_DELAY)
-        if payload:
-            if payload['status'] == 'found':
-                params['timestamp'] = payload['last_attempt_timestamp']
-                params_review = {
-                    'lesson_name': payload['new_attempts'][0]['lesson_title'],
-                    'is_negative': payload['new_attempts'][0]['is_negative'],
-                    'lesson_url': payload['new_attempts'][0]['lesson_url']
-                }
-                logger.debug(payload)
-                bot.send_message(chat_id=env.str('TELEGRAM_CHAT_ID'), text=format_message(params_review))
-            elif payload['status'] == 'timeout':
-                params['timestamp'] = payload['timestamp_to_request']
+            payload = None
+            try:
+                payload = fetch_payload(url, params, dvmn_token)
+            except requests.exceptions.ReadTimeout:
+                logger.warning('Timeout')
+            except requests.exceptions.ConnectionError:
+                logger.warning('ConnectionError')
+                sleep(RECONNECT_DELAY)
+            if payload:
+                if payload['status'] == 'found':
+                    params['timestamp'] = payload['last_attempt_timestamp']
+                    params_review = {
+                        'lesson_name': payload['new_attempts'][0]['lesson_title'],
+                        'is_negative': payload['new_attempts'][0]['is_negative'],
+                        'lesson_url': payload['new_attempts'][0]['lesson_url']
+                    }
+                    logger.debug(payload)
+                    bot.send_message(chat_id=env.str('TELEGRAM_CHAT_ID'), text=format_message(params_review))
+                elif payload['status'] == 'timeout':
+                    params['timestamp'] = payload['timestamp_to_request']
+        except Exception as e:
+            logger.error(e, exc_info=True)
 
 
 if __name__ == '__main__':
