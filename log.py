@@ -8,8 +8,6 @@ from telegram import Bot
 class TelegramLogsHandler(logging.Handler):
 
     def __init__(self, chat_id, log_bot_token):
-        env = environs.Env()
-        env.read_env()
         super().__init__()
         self.chat_id = chat_id
         self.tg_bot = Bot(token=log_bot_token)
