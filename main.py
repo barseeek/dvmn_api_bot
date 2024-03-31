@@ -39,7 +39,9 @@ def main():
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         level=env.str('LOG_LEVEL', 'INFO'))
     bot = Bot(token=env.str('TELEGRAM_BOT_TOKEN'))
-    logger.addHandler(TelegramLogsHandler())
+    chat_id = env.str('TELEGRAM_CHAT_ID')
+    log_bot_token = env.str('TELEGRAM_LOG_BOT_TOKEN')
+    logger.addHandler(TelegramLogsHandler(chat_id, log_bot_token))
     logger.info('Бот запущен')
     url = 'https://dvmn.org/api/long_polling/'
     params = {}
@@ -63,7 +65,7 @@ def main():
                         'lesson_url': payload['new_attempts'][0]['lesson_url']
                     }
                     logger.debug(payload)
-                    bot.send_message(chat_id=env.str('TELEGRAM_CHAT_ID'), text=format_message(params_review))
+                    bot.send_message(chat_id=chat_id, text=format_message(params_review))
                 elif payload['status'] == 'timeout':
                     params['timestamp'] = payload['timestamp_to_request']
         except Exception as e:
